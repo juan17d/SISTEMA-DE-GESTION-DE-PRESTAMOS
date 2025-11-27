@@ -1,0 +1,429 @@
+:host {
+  display: block;
+  padding: 1.2rem;
+}
+
+.settings-card {
+  background: white;
+  padding: 1.2rem;
+  border-radius: 10px;
+  box-shadow: 0px 4px 14px rgba(0,0,0,0.07);
+  margin-bottom: 1rem;
+}
+
+h3 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+}
+
+.setting-item {
+  padding: 0.75rem 0;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.setting-item:last-child {
+  border-bottom: none;
+}
+
+.btn-save {
+  background: #10b981;
+  padding: 0.6rem 1rem;
+  border-radius: 6px;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+.loans-card {
+  background: white;
+  padding: 1.2rem;
+  border-radius: 10px;
+  box-shadow: 0px 4px 14px rgba(0, 0, 0, 0.07);
+}
+
+.loan-form {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.loan-form label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+.loan-form select,
+.loan-form input {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+}
+
+.loan-form button {
+  align-self: flex-end;
+  background: #2563eb;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 0.6rem 1rem;
+  cursor: pointer;
+}
+
+.loan-form button:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th,
+td {
+  padding: 0.75rem;
+  border-bottom: 1px solid #f3f4f6;
+  text-align: left;
+}
+
+.status {
+  padding: 0.25rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.status-returned {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.status-pending {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.btn-return {
+  background: #10b981;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 0.4rem 0.8rem;
+  cursor: pointer;
+}
+
+.btn-return:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.loading,
+.error-message,
+.no-data,
+.help-text {
+  display: block;
+  margin-top: 0.5rem;
+  color: #6b7280;
+}
+
+.error-message {
+  color: #b91c1c;
+}
+
+.no-data {
+  text-align: center;
+  padding: 1rem 0;
+}
+
+// Tabs
+.tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+.tab-btn {
+  padding: 0.75rem 1.5rem;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  font-weight: 500;
+  color: #6b7280;
+  transition: all 0.2s;
+  margin-bottom: -2px;
+}
+
+.tab-btn:hover {
+  color: #2563eb;
+}
+
+.tab-btn.active {
+  color: #2563eb;
+  border-bottom-color: #2563eb;
+}
+
+.tab-content {
+  animation: fadeIn 0.3s;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// CRUD Sections
+.crud-section {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 10px;
+  box-shadow: 0px 4px 14px rgba(0, 0, 0, 0.07);
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.btn-create {
+  background: #10b981;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 0.6rem 1.2rem;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background 0.2s;
+}
+
+.btn-create:hover {
+  background: #059669;
+}
+
+// Edit Form
+.edit-form {
+  background: #f9fafb;
+  padding: 1.5rem;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+  border: 1px solid #e5e7eb;
+}
+
+.edit-form h4 {
+  margin-bottom: 1rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.edit-form input {
+  width: 100%;
+  padding: 0.6rem;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 1rem;
+  margin-bottom: 1rem;
+}
+
+.edit-form input[type="checkbox"] {
+  width: auto !important;
+  padding: 0 !important;
+  margin: 0 0.5rem 0 0 !important;
+  border: none !important;
+}
+
+.edit-form label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: #374151;
+}
+
+.edit-form label input[type="checkbox"] {
+  display: inline-block;
+  vertical-align: middle;
+  margin-bottom: 0;
+}
+
+.edit-form input:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.edit-form input[type="checkbox"]:focus {
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.3);
+}
+
+.form-actions {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+// Data Table
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+}
+
+.data-table thead {
+  background: #f9fafb;
+}
+
+.data-table th {
+  padding: 0.75rem;
+  text-align: left;
+  font-weight: 600;
+  color: #374151;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+.data-table td {
+  padding: 0.75rem;
+  border-bottom: 1px solid #f3f4f6;
+  color: #6b7280;
+}
+
+.data-table tbody tr:hover {
+  background: #f9fafb;
+}
+
+// Action Buttons
+.action-btn {
+  padding: 0.4rem 0.8rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin-right: 0.5rem;
+  transition: all 0.2s;
+}
+
+.action-btn:last-child {
+  margin-right: 0;
+}
+
+.action-edit {
+  background: #3b82f6;
+  color: white;
+}
+
+.action-edit:hover {
+  background: #2563eb;
+}
+
+.action-delete {
+  background: #ef4444;
+  color: white;
+}
+
+.action-delete:hover {
+  background: #dc2626;
+}
+
+.action-save {
+  background: #10b981;
+  color: white;
+}
+
+.action-save:hover {
+  background: #059669;
+}
+
+.action-save:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.action-cancel {
+  background: #6b7280;
+  color: white;
+}
+
+.action-cancel:hover {
+  background: #4b5563;
+}
+
+// Estilos para préstamos con multas
+.data-table tbody tr.overdue {
+  background: #ffebee;
+  
+  &:hover {
+    background: #ffcdd2;
+  }
+}
+
+.days-warning {
+  color: #ff9800;
+  font-weight: 600;
+}
+
+.days-overdue {
+  color: #c62828;
+  font-weight: 700;
+}
+
+.fine-amount {
+  color: #c62828;
+  font-weight: 600;
+  font-size: 0.95em;
+}
+
+.inline-form {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+  align-items: center;
+
+  input {
+    flex: 1;
+    padding: 0.5rem;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+  }
+
+  button {
+    padding: 0.5rem 1rem;
+    background: #6b7280;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.875rem;
+    white-space: nowrap;
+
+    &:hover:not(:disabled) {
+      background: #4b5563;
+    }
+
+    &:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+  }
+}
+
+.stock-low {
+  color: #c62828;
+  font-weight: 600;
+}
+
+.stock-medium {
+  color: #ff9800;
+  font-weight: 600;
+}

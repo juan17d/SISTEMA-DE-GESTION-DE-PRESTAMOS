@@ -1,0 +1,543 @@
+<div class="settings-container">
+  <h2>Configuración del Sistema</h2>
+
+  <!-- Tabs Navigation -->
+  <div class="tabs">
+    <button 
+      class="tab-btn" 
+      [class.active]="activeTab === 'usuarios'"
+      (click)="setActiveTab('usuarios')">
+      Usuarios
+    </button>
+    <button 
+      class="tab-btn" 
+      [class.active]="activeTab === 'prestamos'"
+      (click)="setActiveTab('prestamos')">
+      Préstamos
+    </button>
+  </div>
+
+  <!-- Tab Content: Usuarios -->
+  <div *ngIf="activeTab === 'usuarios'" class="tab-content">
+    <div class="crud-section">
+      <div class="section-header">
+        <h3>Gestión de Usuarios</h3>
+        <button class="btn-create" (click)="createUser()">+ Nuevo Usuario</button>
+      </div>
+
+      <div *ngIf="showUserForm && editingUser" class="edit-form">
+        <h4>{{ editingUser.id === 0 ? 'Crear' : 'Editar' }} Usuario</h4>
+        <form (ngSubmit)="saveUser()">
+          <div>
+            <label>Nombre:</label>
+            <input type="text" [(ngModel)]="editingUser.nombre" name="userNombre" required>
+          </div>
+          <div>
+            <label>Correo:</label>
+            <input type="email" [(ngModel)]="editingUser.correo" name="userCorreo" required>
+          </div>
+          <div>
+            <label>Contraseña {{ editingUser.id === 0 ? '(obligatoria)' : '(dejar vacío para mantener la actual)' }}:</label>
+            <input type="password" [(ngModel)]="editingUser.password" name="userPassword" [required]="editingUser.id === 0">
+          </div>
+          <div class="form-actions">
+            <button type="submit" class="action-btn action-save" [disabled]="submittingUser">
+              {{ submittingUser ? 'Guardando...' : 'Guardar' }}
+            </button>
+            <button type="button" (click)="cancelUserForm()" class="action-btn action-cancel">Cancelar</button>
+          </div>
+        </form>
+      </div>
+
+      <div *ngIf="loadingUsers" class="loading">Cargando usuarios...</div>
+      <div *ngIf="usersError" class="error-message">{{ usersError }}</div>
+
+      <table *ngIf="!loadingUsers && !usersError && users.length > 0" class="data-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Nombre</th>
+            <th>Correo</th>
+            <th>Rol</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let u of users">
+            <td>{{ u.id }}</td>
+            <td>{{ u.nombre }}</td>
+            <td>{{ u.correo }}</td>
+            <td>{{ getRoleName(u) }}</td>
+            <td>
+              <button class="action-btn action-edit" (click)="editUser(u)">Editar</button>
+              <button class="action-btn action-delete" (click)="deleteUser(u)">Eliminar</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div *ngIf="!loadingUsers && !usersError && users.length === 0" class="no-data">
+        No hay usuarios registrados.
+      </div>
+    </div>
+  </div>
+
+  <!-- Tab Content: Préstamos -->
+  <div *ngIf="activeTab === 'prestamos'" class="tab-content">
+    <div class="settings-card">
+      <h3>Configuración del Sistema</h3>
+      <div class="setting-item">
+        <strong>Nombre del sistema:</strong> {{ systemName }}
+      </div>
+      <div class="setting-item">
+        <strong>Días de préstamo:</strong> {{ loanDays }}
+      </div>
+    </div>
+
+    <div class="crud-section">
+      <div class="section-header">
+        <h3>Gestión de Préstamos</h3>
+      </div>
+
+      <form class="loan-form" (ngSubmit)="createLoan()">
+        <div>
+          <label>Usuario</label>
+          <select [(ngModel)]="selectedUserId" name="usuario" required>
+            <option [ngValue]="null" disabled>Selecciona un usuario</option>
+            <option *ngFor="let u of users" [ngValue]="u.id">{{ u.nombre }} ({{ u.correo }})</option>
+          </select>
+        </div>
+        <div>
+          <label>Ejemplar</label>
+          <select [(ngModel)]="selectedEjemplarId" name="ejemplar" required>
+            <option [ngValue]="null" disabled>Selecciona un ejemplar disponible</option>
+            <option *ngFor="let e of availableEjemplares" [ngValue]="e.id">
+              {{ e.libro.titulo }} - {{ e.codigo }}
+            </option>
+          </select>
+          <small class="help-text" *ngIf="availableEjemplares.length === 0">
+            No hay ejemplares disponibles. Registra nuevos libros o espera devoluciones.
+          </small>
+        </div>
+        <div>
+          <label>Días de préstamo</label>
+          <input type="number" min="1" [(ngModel)]="loanDays" name="diasPrestamo">
+        </div>
+        <button type="submit" [disabled]="creatingLoan || availableEjemplares.length === 0">
+          {{ creatingLoan ? 'Registrando...' : 'Registrar préstamo' }}
+        </button>
+      </form>
+
+      <div *ngIf="loadingLoans" class="loading">Cargando préstamos...</div>
+      <div *ngIf="errorLoans" class="error-message">{{ errorLoans }}</div>
+
+      <table *ngIf="!loadingLoans && prestamos.length > 0" class="data-table">
+        <thead>
+          <tr>
+            <th>Usuario</th>
+            <th>Libro</th>
+            <th>Ejemplar</th>
+            <th>Fecha préstamo</th>
+            <th>Fecha devolución</th>
+            <th>Días restantes</th>
+            <th>Multa</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let p of prestamos" [class.overdue]="hasOverdue(p) && !p.devuelto">
+            <td>{{ p.usuario.nombre }}</td>
+            <td>{{ p.ejemplar.libro.titulo }}</td>
+            <td>{{ p.ejemplar.codigo }}</td>
+            <td>{{ p.fechaPrestamo }}</td>
+            <td>{{ p.fechaDevolucion }}</td>
+            <td>
+              <span *ngIf="!p.devuelto" [class.days-warning]="getDaysRemaining(p) <= 3 && getDaysRemaining(p) >= 0" [class.days-overdue]="hasOverdue(p)">
+                {{ getDaysRemaining(p) > 0 ? getDaysRemaining(p) + ' días' : hasOverdue(p) ? Math.abs(getDaysRemaining(p)) + ' días vencido' : 'Vence hoy' }}
+              </span>
+              <span *ngIf="p.devuelto">-</span>
+            </td>
+            <td>
+              <span *ngIf="!p.devuelto && getFine(p) > 0" class="fine-amount">
+                ${{ getFine(p).toLocaleString() }}
+              </span>
+              <span *ngIf="p.devuelto || getFine(p) === 0">$0</span>
+            </td>
+            <td>
+              <span class="status" [class.status-returned]="p.devuelto" [class.status-pending]="!p.devuelto">
+                {{ p.devuelto ? 'Devuelto' : 'Pendiente' }}
+              </span>
+            </td>
+            <td>
+              <button
+                *ngIf="!p.devuelto"
+                class="btn-return"
+                type="button"
+                (click)="markAsReturned(p)"
+                [disabled]="returningLoanId === p.id">
+                {{ returningLoanId === p.id ? 'Actualizando...' : 'Marcar devuelto' }}
+              </button>
+              <button
+                class="action-btn action-delete"
+                type="button"
+                (click)="deleteLoan(p)">
+                Eliminar
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+    <div *ngIf="!loadingLoans && prestamos.length === 0" class="no-data">
+      No hay préstamos registrados.
+    </div>
+  </div>
+</div>
+
+<!-- Tab Content: Autores -->
+<div *ngIf="activeTab === 'autores'" class="tab-content">
+  <div class="crud-section">
+    <div class="section-header">
+      <h3>Gestión de Autores</h3>
+        <button class="btn-create" (click)="createAutor()">+ Nuevo Autor</button>
+      </div>
+
+      <div *ngIf="showAutorForm" class="edit-form">
+        <h4>{{ editingAutor ? 'Editar' : 'Crear' }} Autor</h4>
+        <form (ngSubmit)="saveAutor()">
+          <div>
+            <label>Nombre:</label>
+            <input type="text" [(ngModel)]="autorNombre" name="autorNombre" required>
+          </div>
+          <div class="form-actions">
+            <button type="submit" class="action-btn action-save" [disabled]="submittingAutor">
+              {{ submittingAutor ? 'Guardando...' : 'Guardar' }}
+            </button>
+            <button type="button" (click)="cancelAutorForm()" class="action-btn action-cancel">Cancelar</button>
+          </div>
+        </form>
+      </div>
+
+      <div *ngIf="loadingAutores" class="loading">Cargando autores...</div>
+
+      <table *ngIf="!loadingAutores && autores.length > 0" class="data-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Nombre</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let a of autores">
+            <td>{{ a.id }}</td>
+            <td>{{ a.nombre }}</td>
+            <td>
+              <button class="action-btn action-edit" (click)="editAutor(a)">Editar</button>
+              <button class="action-btn action-delete" (click)="deleteAutor(a)">Eliminar</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div *ngIf="!loadingAutores && autores.length === 0" class="no-data">
+        No hay autores registrados.
+      </div>
+    </div>
+  </div>
+
+  <!-- Tab Content: Editoriales -->
+  <div *ngIf="activeTab === 'editoriales'" class="tab-content">
+    <div class="crud-section">
+      <div class="section-header">
+        <h3>Gestión de Editoriales</h3>
+        <button class="btn-create" (click)="createEditorial()">+ Nueva Editorial</button>
+      </div>
+
+      <div *ngIf="showEditorialForm" class="edit-form">
+        <h4>{{ editingEditorial ? 'Editar' : 'Crear' }} Editorial</h4>
+        <form (ngSubmit)="saveEditorial()">
+          <div>
+            <label>Nombre:</label>
+            <input type="text" [(ngModel)]="editorialNombre" name="editorialNombre" required>
+          </div>
+          <div class="form-actions">
+            <button type="submit" class="action-btn action-save" [disabled]="submittingEditorial">
+              {{ submittingEditorial ? 'Guardando...' : 'Guardar' }}
+            </button>
+            <button type="button" (click)="cancelEditorialForm()" class="action-btn action-cancel">Cancelar</button>
+          </div>
+        </form>
+      </div>
+
+      <div *ngIf="loadingEditoriales" class="loading">Cargando editoriales...</div>
+
+      <table *ngIf="!loadingEditoriales && editoriales.length > 0" class="data-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Nombre</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let e of editoriales">
+            <td>{{ e.id }}</td>
+            <td>{{ e.nombre }}</td>
+            <td>
+              <button class="action-btn action-edit" (click)="editEditorial(e)">Editar</button>
+              <button class="action-btn action-delete" (click)="deleteEditorial(e)">Eliminar</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div *ngIf="!loadingEditoriales && editoriales.length === 0" class="no-data">
+        No hay editoriales registradas.
+      </div>
+    </div>
+  </div>
+
+  <!-- Tab Content: Géneros -->
+  <div *ngIf="activeTab === 'generos'" class="tab-content">
+    <div class="crud-section">
+      <div class="section-header">
+        <h3>Gestión de Géneros</h3>
+        <button class="btn-create" (click)="createGenero()">+ Nuevo Género</button>
+      </div>
+
+      <div *ngIf="showGeneroForm" class="edit-form">
+        <h4>{{ editingGenero ? 'Editar' : 'Crear' }} Género</h4>
+        <form (ngSubmit)="saveGenero()">
+          <div>
+            <label>Nombre:</label>
+            <input type="text" [(ngModel)]="generoNombre" name="generoNombre" required>
+          </div>
+          <div class="form-actions">
+            <button type="submit" class="action-btn action-save" [disabled]="submittingGenero">
+              {{ submittingGenero ? 'Guardando...' : 'Guardar' }}
+            </button>
+            <button type="button" (click)="cancelGeneroForm()" class="action-btn action-cancel">Cancelar</button>
+          </div>
+        </form>
+      </div>
+
+      <div *ngIf="loadingGeneros" class="loading">Cargando géneros...</div>
+
+      <table *ngIf="!loadingGeneros && generos.length > 0" class="data-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Nombre</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let g of generos">
+            <td>{{ g.id }}</td>
+            <td>{{ g.nombre }}</td>
+            <td>
+              <button class="action-btn action-edit" (click)="editGenero(g)">Editar</button>
+              <button class="action-btn action-delete" (click)="deleteGenero(g)">Eliminar</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div *ngIf="!loadingGeneros && generos.length === 0" class="no-data">
+        No hay géneros registrados.
+      </div>
+    </div>
+  </div>
+
+  <!-- Tab Content: Ejemplares -->
+  <div *ngIf="activeTab === 'ejemplares'" class="tab-content">
+    <div class="crud-section">
+      <div class="section-header">
+        <h3>Gestión de Ejemplares</h3>
+        <button class="btn-create" (click)="createEjemplar()">+ Nuevo Ejemplar</button>
+      </div>
+
+      <div *ngIf="showEjemplarForm" class="edit-form">
+        <h4>{{ editingEjemplar ? 'Editar' : 'Crear' }} Ejemplar</h4>
+        <form (ngSubmit)="saveEjemplar()">
+          <div>
+            <label>Código:</label>
+            <input type="text" [(ngModel)]="ejemplarCodigo" name="ejemplarCodigo" required>
+          </div>
+          <div>
+            <label>Libro:</label>
+            <select [(ngModel)]="selectedLibroId" name="libro" required>
+              <option [ngValue]="null" disabled>Selecciona un libro</option>
+              <option *ngFor="let libro of libros" [ngValue]="libro.id">
+                {{ libro.titulo }}
+              </option>
+            </select>
+          </div>
+          <div>
+            <label>
+              <input type="checkbox" [(ngModel)]="ejemplarDisponible" name="disponible">
+              Disponible
+            </label>
+          </div>
+          <div class="form-actions">
+            <button type="submit" class="action-btn action-save" [disabled]="submittingEjemplar">
+              {{ submittingEjemplar ? 'Guardando...' : 'Guardar' }}
+            </button>
+            <button type="button" (click)="cancelEjemplarForm()" class="action-btn action-cancel">Cancelar</button>
+          </div>
+        </form>
+      </div>
+
+      <div *ngIf="loadingEjemplares" class="loading">Cargando ejemplares...</div>
+
+      <table *ngIf="!loadingEjemplares && ejemplaresList.length > 0" class="data-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Código</th>
+            <th>Libro</th>
+            <th>Disponible</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let e of ejemplaresList">
+            <td>{{ e.id }}</td>
+            <td>{{ e.codigo }}</td>
+            <td>{{ e.libro.titulo }}</td>
+            <td>
+              <span class="status" [class.status-returned]="e.disponible" [class.status-pending]="!e.disponible">
+                {{ e.disponible ? 'Sí' : 'No' }}
+              </span>
+            </td>
+            <td>
+              <button class="action-btn action-edit" (click)="editEjemplar(e)">Editar</button>
+              <button class="action-btn action-delete" (click)="deleteEjemplar(e)">Eliminar</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div *ngIf="!loadingEjemplares && ejemplaresList.length === 0" class="no-data">
+        No hay ejemplares registrados.
+      </div>
+    </div>
+  </div>
+
+  <!-- Tab Content: Libros -->
+  <div *ngIf="activeTab === 'libros'" class="tab-content">
+    <div class="crud-section">
+      <div class="section-header">
+        <h3>Gestión de Libros</h3>
+        <button class="btn-create" (click)="createBook()">+ Nuevo Libro</button>
+      </div>
+
+      <div *ngIf="showBookForm" class="edit-form">
+        <h4>{{ editingBook ? 'Editar' : 'Crear' }} Libro</h4>
+        <form (ngSubmit)="saveBook()">
+          <div>
+            <label>Título:</label>
+            <input type="text" [(ngModel)]="bookTitulo" name="bookTitulo" required>
+          </div>
+          <div>
+            <label>Editorial:</label>
+            <select [(ngModel)]="selectedBookEditorialId" name="bookEditorial" required>
+              <option [ngValue]="null" disabled>Selecciona una editorial</option>
+              <option *ngFor="let e of editoriales" [ngValue]="e.id">{{ e.nombre }}</option>
+            </select>
+            <div class="inline-form">
+              <input
+                type="text"
+                placeholder="Nueva editorial"
+                [(ngModel)]="newBookEditorialName"
+                name="newBookEditorial">
+              <button type="button" (click)="addNewBookEditorial()" [disabled]="addingBookEditorial">
+                {{ addingBookEditorial ? 'Guardando...' : 'Añadir editorial' }}
+              </button>
+            </div>
+          </div>
+          <div>
+            <label>Género:</label>
+            <select [(ngModel)]="selectedBookGeneroId" name="bookGenero" required>
+              <option [ngValue]="null" disabled>Selecciona un género</option>
+              <option *ngFor="let g of generos" [ngValue]="g.id">{{ g.nombre }}</option>
+            </select>
+            <div class="inline-form">
+              <input
+                type="text"
+                placeholder="Nuevo género"
+                [(ngModel)]="newBookGeneroName"
+                name="newBookGenero">
+              <button type="button" (click)="addNewBookGenero()" [disabled]="addingBookGenero">
+                {{ addingBookGenero ? 'Guardando...' : 'Añadir género' }}
+              </button>
+            </div>
+          </div>
+          <div>
+            <label>Autores:</label>
+            <select multiple [(ngModel)]="selectedBookAuthorIds" name="bookAutores" required>
+              <option *ngFor="let a of autores" [ngValue]="a.id">{{ a.nombre }}</option>
+            </select>
+            <small class="help-text">Mantén presionada la tecla Ctrl o Cmd para seleccionar múltiples autores.</small>
+            <div class="inline-form">
+              <input
+                type="text"
+                placeholder="Nuevo autor"
+                [(ngModel)]="newBookAuthorName"
+                name="newBookAuthor">
+              <button type="button" (click)="addNewBookAuthor()" [disabled]="addingBookAuthor">
+                {{ addingBookAuthor ? 'Guardando...' : 'Añadir autor' }}
+              </button>
+            </div>
+          </div>
+          <div class="form-actions">
+            <button type="submit" class="action-btn action-save" [disabled]="submittingBook">
+              {{ submittingBook ? 'Guardando...' : 'Guardar' }}
+            </button>
+            <button type="button" (click)="cancelBookForm()" class="action-btn action-cancel">Cancelar</button>
+          </div>
+        </form>
+      </div>
+
+      <div *ngIf="loadingBooks" class="loading">Cargando libros...</div>
+
+      <table *ngIf="!loadingBooks && libros.length > 0" class="data-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Título</th>
+            <th>Autor(es)</th>
+            <th>Editorial</th>
+            <th>Género</th>
+            <th>Stock Disponible</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let b of libros">
+            <td>{{ b.id }}</td>
+            <td>{{ b.titulo }}</td>
+            <td>{{ getAuthorsString(b) }}</td>
+            <td>{{ getEditorialName(b) }}</td>
+            <td>{{ getGeneroName(b) }}</td>
+            <td>
+              <span [class.stock-low]="b.stockDisponible === 0" [class.stock-medium]="b.stockDisponible > 0 && b.stockDisponible < 3">
+                {{ b.stockDisponible }}
+              </span>
+            </td>
+            <td>
+              <button class="action-btn action-edit" (click)="editBook(b)">Editar</button>
+              <button class="action-btn action-delete" (click)="deleteBook(b)">Eliminar</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div *ngIf="!loadingBooks && libros.length === 0" class="no-data">
+        No hay libros registrados.
+      </div>
+    </div>
+  </div>
+</div>

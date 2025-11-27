@@ -1,0 +1,48 @@
+<div class="genres-container">
+  <div class="header">
+    <h2>Gestión de Géneros</h2>
+    <button class="btn-create" (click)="createGenero()">+ Nuevo Género</button>
+  </div>
+
+  <div *ngIf="showForm && editingGenero !== undefined" class="edit-form">
+    <h3>{{ editingGenero ? 'Editar' : 'Crear' }} Género</h3>
+    <form (ngSubmit)="saveGenero()">
+      <div>
+        <label>Nombre:</label>
+        <input type="text" [(ngModel)]="generoNombre" name="nombre" required>
+      </div>
+      <div class="form-actions">
+        <button type="submit" class="action-btn action-save" [disabled]="submitting">
+          {{ submitting ? 'Guardando...' : 'Guardar' }}
+        </button>
+        <button type="button" (click)="cancelForm()" class="action-btn action-cancel">Cancelar</button>
+      </div>
+    </form>
+  </div>
+
+  <div *ngIf="loading" class="loading">Cargando géneros...</div>
+
+  <table *ngIf="!loading && generos.length > 0" class="data-table">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Nombre</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let g of generos">
+        <td>{{ g.id }}</td>
+        <td>{{ g.nombre }}</td>
+        <td>
+          <button class="action-btn action-edit" (click)="editGenero(g)">Editar</button>
+          <button class="action-btn action-delete" (click)="deleteGenero(g)">Eliminar</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div *ngIf="!loading && generos.length === 0" class="no-data">
+    No hay géneros registrados.
+  </div>
+</div>

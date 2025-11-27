@@ -1,0 +1,130 @@
+<div class="books-container">
+  <div class="header">
+    <h2>Gestión de Libros</h2>
+    <button class="btn-create" (click)="createBook()">+ Nuevo Libro</button>
+  </div>
+
+  <div *ngIf="loading" class="loading">Cargando libros...</div>
+  <div *ngIf="error" class="error-message">{{ error }}</div>
+
+  <div *ngIf="(showEditForm || showCreateForm) && editingBook" class="edit-form">
+    <h3>{{ showCreateForm ? 'Crear' : 'Editar' }} Libro</h3>
+    <form (ngSubmit)="saveBook()">
+      <div>
+        <label>Título:</label>
+        <input type="text" [(ngModel)]="editingBook.titulo" name="titulo" required>
+      </div>
+      <div>
+        <label>Editorial:</label>
+        <select [(ngModel)]="selectedEditorialId" name="editorial" required>
+          <option [ngValue]="null" disabled>Selecciona una editorial ({{ editorials.length }} disponibles)</option>
+          <option *ngFor="let e of editorials" [ngValue]="e.id">{{ e.nombre }}</option>
+        </select>
+        <div class="inline-form">
+          <input
+            type="text"
+            placeholder="Nueva editorial"
+            [(ngModel)]="newEditorialName"
+            name="newEditorial"
+          >
+          <button type="button" (click)="addNewEditorial()" [disabled]="addingEditorial">
+            {{ addingEditorial ? 'Guardando...' : 'Añadir editorial' }}
+          </button>
+        </div>
+      </div>
+      <div>
+        <label>Género:</label>
+        <select [(ngModel)]="selectedGeneroId" name="genero" required>
+          <option [ngValue]="null" disabled>Selecciona un género</option>
+          <option *ngFor="let g of generos" [ngValue]="g.id">{{ g.nombre }}</option>
+        </select>
+        <div class="inline-form">
+          <input
+            type="text"
+            placeholder="Nuevo género"
+            [(ngModel)]="newGeneroName"
+            name="newGenero"
+          >
+          <button type="button" (click)="addNewGenero()" [disabled]="addingGenero">
+            {{ addingGenero ? 'Guardando...' : 'Añadir género' }}
+          </button>
+        </div>
+      </div>
+      <div class="authors-section">
+        <div class="authors-header" (click)="toggleAuthors()">
+          <span class="toggle-icon" [class.expanded]="authorsExpanded">▼</span>
+          <label>
+            Autores: 
+            <span class="count">
+              {{ selectedAuthorIds.length > 0 
+                ? '(' + selectedAuthorIds.length + ')' 
+                : '(ninguno)' 
+              }}
+            </span>
+          </label>
+        </div>
+        <div *ngIf="authorsExpanded" class="authors-content">
+          <div class="selected-authors">
+            <div *ngIf="selectedAuthorIds.length === 0" class="no-authors">No hay autores seleccionados</div>
+            <div *ngFor="let id of selectedAuthorIds" class="author-tag">
+              {{ getAuthorName(id) }}
+              <button type="button" (click)="removeAuthor(id)" class="remove-btn">✕</button>
+            </div>
+          </div>
+          <div class="author-dropdown">
+            <select [(ngModel)]="selectedAuthorDropdown" name="authorDropdown" (change)="addAuthorFromDropdown()">
+              <option [ngValue]="null">+ Añadir autor</option>
+              <option *ngFor="let a of getAvailableAuthors()" [ngValue]="a.id">
+                {{ a.nombre }}
+              </option>
+            </select>
+          </div>
+          <div class="inline-form">
+            <input
+              type="text"
+              placeholder="Crear nuevo autor"
+              [(ngModel)]="newAuthorName"
+              name="newAuthor"
+            >
+            <button type="button" (click)="addNewAuthor()" [disabled]="addingAuthor">
+              {{ addingAuthor ? 'Guardando...' : 'Crear' }}
+            </button>
+          </div>
+          <small class="help-text">Selecciona autores del dropdown o crea uno nuevo.</small>
+        </div>
+      </div>
+      <div class="form-actions">
+        <button type="submit" class="action-btn action-save" [disabled]="submitting">
+          {{ submitting ? 'Guardando...' : 'Guardar' }}
+        </button>
+        <button type="button" (click)="cancelEdit()" class="action-btn action-cancel">Cancelar</button>
+      </div>
+    </form>
+  </div>
+
+  <div *ngIf="!loading && !error" class="books-grid">
+    <div *ngFor="let b of books" class="book-card">
+      <div class="book-title">{{ b.titulo }}</div>
+      <div class="book-info">
+        <strong>Autor(es):</strong> {{ getAuthorsString(b) }}
+      </div>
+      <div class="book-info">
+        <strong>Editorial:</strong> {{ getEditorialName(b) }}
+      </div>
+      <div class="book-info">
+        <strong>Ejemplares disponibles:</strong> 
+        <span [class.stock-low]="b.stockDisponible === 0" [class.stock-medium]="b.stockDisponible > 0 && b.stockDisponible < 3">
+          {{ b.stockDisponible }}
+        </span>
+      </div>
+      <div class="book-actions">
+        <button class="action-btn action-edit" (click)="editBook(b)">Editar</button>
+        <button class="action-btn action-delete" (click)="deleteBook(b)">Eliminar</button>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="!loading && !error && books.length === 0" class="no-books">
+    No hay libros registrados.
+  </div>
+</div>

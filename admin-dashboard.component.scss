@@ -1,0 +1,37 @@
+:host {
+  display: block;
+  padding: 1.5rem;
+  background: #f4f6f9;
+  min-height: 100vh;
+  font-family: Inter, sans-serif;
+}
+
+/* Tarjetas */
+.card {
+  background: #ffffff;
+  padding: 1.25rem;
+  border-radius: 10px;
+  box-shadow: 0px 4px 12px rgba(0,0,0,0.06);
+  margin-bottom: 1rem;
+}
+
+/* Grid general */
+.grid {
+  display: grid;
+  gap: 1rem;
+}
+
+.grid-2 {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.grid-3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+/* Títulos */
+h2 {
+  font-size: 1.35rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}

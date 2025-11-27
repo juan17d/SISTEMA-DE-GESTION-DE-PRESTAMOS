@@ -1,0 +1,87 @@
+<div class="bibliotecario-dashboard">
+  <h1>Gestión de Préstamos</h1>
+  <p class="subtitle">Crear préstamos para clientes</p>
+
+  <div *ngIf="error" class="error-message">{{ error }}</div>
+
+  <!-- Formulario de creación de préstamo -->
+  <div class="loan-form-section">
+    <h2>Registrar Nuevo Préstamo</h2>
+    <form class="loan-form" (ngSubmit)="createLoan()">
+      <div class="form-group">
+        <label>Cliente:</label>
+        <select [(ngModel)]="selectedUserId" name="usuario" required [disabled]="loadingUsers">
+          <option [ngValue]="null" disabled>Selecciona un cliente</option>
+          <option *ngFor="let u of users" [ngValue]="u.id">
+            {{ u.nombre }} ({{ u.correo }})
+          </option>
+        </select>
+        <div *ngIf="loadingUsers" class="loading-small">Cargando clientes...</div>
+      </div>
+
+      <div class="form-group">
+        <label>Ejemplar:</label>
+        <select [(ngModel)]="selectedEjemplarId" name="ejemplar" required [disabled]="loadingEjemplares">
+          <option [ngValue]="null" disabled>Selecciona un ejemplar disponible</option>
+          <option *ngFor="let e of availableEjemplares" [ngValue]="e.id">
+            {{ e.libro.titulo }} - {{ e.codigo }}
+          </option>
+        </select>
+        <small class="help-text" *ngIf="availableEjemplares.length === 0 && !loadingEjemplares">
+          No hay ejemplares disponibles. Espera devoluciones o registra nuevos libros.
+        </small>
+        <div *ngIf="loadingEjemplares" class="loading-small">Cargando ejemplares...</div>
+      </div>
+
+      <div class="form-group">
+        <label>Días de préstamo:</label>
+        <input type="number" min="1" max="30" [(ngModel)]="loanDays" name="diasPrestamo" required>
+        <small class="help-text">Por defecto: 15 días</small>
+      </div>
+
+      <button 
+        type="submit" 
+        class="btn-create-loan"
+        [disabled]="creatingLoan || availableEjemplares.length === 0 || loadingUsers || loadingEjemplares">
+        {{ creatingLoan ? 'Registrando...' : 'Registrar Préstamo' }}
+      </button>
+    </form>
+  </div>
+
+  <!-- Lista de préstamos recientes -->
+  <div class="recent-loans-section">
+    <h2>Préstamos Recientes</h2>
+    <div *ngIf="loadingLoans" class="loading">Cargando préstamos...</div>
+    
+    <div *ngIf="!loadingLoans && prestamos.length === 0" class="no-data">
+      No hay préstamos registrados.
+    </div>
+
+    <table *ngIf="!loadingLoans && prestamos.length > 0" class="loans-table">
+      <thead>
+        <tr>
+          <th>Cliente</th>
+          <th>Libro</th>
+          <th>Ejemplar</th>
+          <th>Fecha préstamo</th>
+          <th>Fecha devolución</th>
+          <th>Estado</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let p of prestamos.slice(0, 10)">
+          <td>{{ p.usuario.nombre }}</td>
+          <td>{{ p.ejemplar.libro.titulo }}</td>
+          <td>{{ p.ejemplar.codigo }}</td>
+          <td>{{ p.fechaPrestamo }}</td>
+          <td>{{ p.fechaDevolucion }}</td>
+          <td>
+            <span class="status" [class.status-returned]="p.devuelto" [class.status-pending]="!p.devuelto">
+              {{ p.devuelto ? 'Devuelto' : 'Pendiente' }}
+            </span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

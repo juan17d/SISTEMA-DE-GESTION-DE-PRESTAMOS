@@ -1,0 +1,69 @@
+<div class="ejemplares-container">
+  <div class="header">
+    <h2>Gestión de Ejemplares</h2>
+    <button class="btn-create" (click)="createEjemplar()">+ Nuevo Ejemplar</button>
+  </div>
+
+  <div *ngIf="showForm && editingEjemplar !== undefined" class="edit-form">
+    <h3>{{ editingEjemplar ? 'Editar' : 'Crear' }} Ejemplar</h3>
+    <form (ngSubmit)="saveEjemplar()">
+      <div>
+        <label>Código:</label>
+        <input type="text" [(ngModel)]="ejemplarCodigo" name="codigo" required>
+      </div>
+      <div>
+        <label>Libro:</label>
+        <select [(ngModel)]="selectedLibroId" name="libro" required>
+          <option [ngValue]="null" disabled>Selecciona un libro</option>
+          <option *ngFor="let libro of libros" [ngValue]="libro.id">{{ libro.titulo }}</option>
+        </select>
+      </div>
+      <div>
+        <label>
+          <input type="checkbox" [(ngModel)]="ejemplarDisponible" name="disponible">
+          Disponible
+        </label>
+      </div>
+      <div class="form-actions">
+        <button type="submit" class="action-btn action-save" [disabled]="submitting">
+          {{ submitting ? 'Guardando...' : 'Guardar' }}
+        </button>
+        <button type="button" (click)="cancelForm()" class="action-btn action-cancel">Cancelar</button>
+      </div>
+    </form>
+  </div>
+
+  <div *ngIf="loading" class="loading">Cargando ejemplares...</div>
+
+  <table *ngIf="!loading && ejemplares.length > 0" class="data-table">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Código</th>
+        <th>Libro</th>
+        <th>Disponible</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let e of ejemplares">
+        <td>{{ e.id }}</td>
+        <td>{{ e.codigo }}</td>
+        <td>{{ e.libro.titulo }}</td>
+        <td>
+          <span [class.badge-available]="e.disponible" [class.badge-unavailable]="!e.disponible">
+            {{ e.disponible ? 'Sí' : 'No' }}
+          </span>
+        </td>
+        <td>
+          <button class="action-btn action-edit" (click)="editEjemplar(e)">Editar</button>
+          <button class="action-btn action-delete" (click)="deleteEjemplar(e)">Eliminar</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div *ngIf="!loading && ejemplares.length === 0" class="no-data">
+    No hay ejemplares registrados.
+  </div>
+</div>

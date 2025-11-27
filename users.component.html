@@ -1,0 +1,57 @@
+<div class="table-container">
+  <h2>Gestión de Usuarios</h2>
+
+  <div *ngIf="loading" class="loading">Cargando usuarios...</div>
+  <div *ngIf="error" class="error-message">{{ error }}</div>
+
+  <div *ngIf="showEditForm && editingUser" class="edit-form">
+    <h3>Editar Usuario</h3>
+    <form (ngSubmit)="saveUser()">
+      <div>
+        <label>Nombre:</label>
+        <input type="text" [(ngModel)]="editingUser.nombre" name="nombre" required>
+      </div>
+      <div>
+        <label>Correo:</label>
+        <input type="email" [(ngModel)]="editingUser.correo" name="correo" required>
+      </div>
+      <div>
+        <label>Contraseña (dejar vacío para no cambiar):</label>
+        <input type="password" [(ngModel)]="editingUser.password" name="password">
+      </div>
+      <div class="form-actions">
+        <button type="submit" class="action-btn action-save">Guardar</button>
+        <button type="button" (click)="cancelEdit()" class="action-btn action-cancel">Cancelar</button>
+      </div>
+    </form>
+  </div>
+
+  <table *ngIf="!loading && !error">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Nombre</th>
+        <th>Correo</th>
+        <th>Rol</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      <tr *ngFor="let u of users">
+        <td>{{ u.id }}</td>
+        <td>{{ u.nombre }}</td>
+        <td>{{ u.correo }}</td>
+        <td>{{ getRoleName(u) }}</td>
+        <td>
+          <button class="action-btn action-edit" (click)="editUser(u)">Editar</button>
+          <button class="action-btn action-delete" (click)="deleteUser(u)">Eliminar</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div *ngIf="!loading && !error && users.length === 0" class="no-users">
+    No hay usuarios registrados.
+  </div>
+</div>

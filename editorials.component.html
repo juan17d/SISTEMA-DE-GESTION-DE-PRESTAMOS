@@ -1,0 +1,48 @@
+<div class="editorials-container">
+  <div class="header">
+    <h2>Gestión de Editoriales</h2>
+    <button class="btn-create" (click)="createEditorial()">+ Nueva Editorial</button>
+  </div>
+
+  <div *ngIf="showForm && editingEditorial !== undefined" class="edit-form">
+    <h3>{{ editingEditorial ? 'Editar' : 'Crear' }} Editorial</h3>
+    <form (ngSubmit)="saveEditorial()">
+      <div>
+        <label>Nombre:</label>
+        <input type="text" [(ngModel)]="editorialNombre" name="nombre" required>
+      </div>
+      <div class="form-actions">
+        <button type="submit" class="action-btn action-save" [disabled]="submitting">
+          {{ submitting ? 'Guardando...' : 'Guardar' }}
+        </button>
+        <button type="button" (click)="cancelForm()" class="action-btn action-cancel">Cancelar</button>
+      </div>
+    </form>
+  </div>
+
+  <div *ngIf="loading" class="loading">Cargando editoriales...</div>
+
+  <table *ngIf="!loading && editoriales.length > 0" class="data-table">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Nombre</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let e of editoriales">
+        <td>{{ e.id }}</td>
+        <td>{{ e.nombre }}</td>
+        <td>
+          <button class="action-btn action-edit" (click)="editEditorial(e)">Editar</button>
+          <button class="action-btn action-delete" (click)="deleteEditorial(e)">Eliminar</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div *ngIf="!loading && editoriales.length === 0" class="no-data">
+    No hay editoriales registradas.
+  </div>
+</div>

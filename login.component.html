@@ -1,0 +1,22 @@
+<div class="login-container">
+
+  <form [formGroup]="loginForm" (ngSubmit)="login()">
+
+    <h2>Iniciar Sesión</h2>
+
+    <label>Usuario</label>
+    <input formControlName="username" type="text">
+    <div *ngIf="loginForm.get('username')?.touched && loginForm.get('username')?.invalid" class="error">
+      El usuario es obligatorio.
+    </div>
+
+    <label>Contraseña</label>
+    <input formControlName="password" type="password">
+    <div *ngIf="loginForm.get('password')?.touched && loginForm.get('password')?.invalid" class="error">
+      La contraseña es obligatoria.
+    </div>
+
+    <button type="submit">Ingresar</button>
+
+  </form>
+</div>
